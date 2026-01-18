@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>PULSAR - User Registration</title>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #FFEB3B 0%, #FDD835 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .logo-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .lightning-bolt {
+            width: 80px;
+            height: 80px;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+        .logo-header h1 {
+            font-size: 36px;
+            font-weight: 900;
+            color: #000000;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 5px;
+        }
+        .logo-header .subtitle {
+            font-size: 14px;
+            color: #000;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+        .registration-card {
+            background: #000000;
+            border: 3px solid #FFEB3B;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 400px;
+            width: 100%;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+        }
+        .registration-card h2 {
+            color: #FFEB3B;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 24px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-label {
+            display: block;
+            color: #FFEB3B;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+        .form-input, .form-select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #FFEB3B;
+            background: #1a1a1a;
+            color: #FFEB3B;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        .form-input::placeholder {
+            color: #666666;
+        }
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #FDD835;
+            box-shadow: 0 0 10px rgba(255,235,59,0.3);
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .btn-submit {
+            width: 100%;
+            padding: 15px;
+            background: #FFEB3B;
+            color: #000000;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 10px;
+        }
+        .btn-submit:hover {
+            background: #FDD835;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(255,235,59,0.4);
+        }
+        .btn-submit:active {
+            transform: translateY(0);
+        }
+        .success-message {
+            display: none;
+            background: #000000;
+            border: 3px solid #FFEB3B;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+        }
+        .success-message.active {
+            display: block;
+        }
+        .success-message h2 {
+            color: #FFEB3B;
+            font-size: 28px;
+            margin-bottom: 15px;
+        }
+        .success-message p {
+            color: #FFEB3B;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .success-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+        .error-message {
+            color: #ff6b6b;
+            background: #1a1a1a;
+            border: 2px solid #ff6b6b;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            display: none;
+        }
+        .error-message.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="logo-header">
+        <div class="lightning-bolt">
+            <svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+                <ellipse cx="150" cy="150" rx="130" ry="110" fill="none" stroke="#000000" stroke-width="35"/>
+                <ellipse cx="145" cy="145" rx="125" ry="105" fill="none" stroke="#3a3a3a" stroke-width="25" opacity="0.5"/>
+                <line x1="240" y1="60" x2="270" y2="45" stroke="#FFEB3B" stroke-width="10" stroke-linecap="round"/>
+                <line x1="235" y1="75" x2="265" y2="65" stroke="#FFEB3B" stroke-width="10" stroke-linecap="round"/>
+                <line x1="230" y1="90" x2="260" y2="85" stroke="#FFEB3B" stroke-width="10" stroke-linecap="round"/>
+                <ellipse cx="150" cy="150" rx="95" ry="75" fill="#FFEB3B"/>
+                <polygon points="160,80 110,145 140,145 120,220 190,135 155,135 175,80" fill="#000000"/>
+                <polygon points="163,83 113,145 140,145 123,215 185,138 157,138 173,83" fill="#2a2a2a" opacity="0.3"/>
+            </svg>
+        </div>
+        <h1>PULSAR</h1>
+        <div class="subtitle">USER REGISTRATION</div>
+    </div>
+
+    <div class="registration-card" id="registrationForm">
+        <h2>Register Your Profile</h2>
+        
+        <div class="error-message" id="errorMessage"></div>
+        
+        <form id="userForm">
+            <div class="form-group">
+                <label class="form-label">Full Name</label>
+                <input type="text" class="form-input" id="userName" placeholder="Enter your name" required>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Gender</label>
+                    <select class="form-select" id="userGender" required>
+                        <option value="">Select</option>
+                        <option value="M">Male</option>
+                        <option value="F">Female</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Age</label>
+                    <input type="number" class="form-input" id="userAge" placeholder="Age" min="1" max="120" required>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Height (cm)</label>
+                    <input type="number" class="form-input" id="userHeight" placeholder="Height" min="50" max="250" step="0.1" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Weight (kg)</label>
+                    <input type="number" class="form-input" id="userWeight" placeholder="Weight" min="20" max="300" step="0.1" required>
+                </div>
+            </div>
+            
+            <button type="submit" class="btn-submit">Register</button>
+        </form>
+    </div>
+
+    <div class="success-message" id="successMessage">
+        <div class="success-icon">✓</div>
+        <h2>Registration Successful!</h2>
+        <p>Your profile has been created. You can now use the heart rate monitor system.</p>
+        <p style="margin-top: 20px; font-size: 14px;">Return to the main screen to connect your device.</p>
+    </div>
+
+    <script>
+        // ========== FIREBASE CONFIGURATION ==========
+        const firebaseConfig = {
+            apiKey: "AIzaSyDgSIPNK5aEWON4rpMOtkT4HqZDAOCyh34",
+            authDomain: "pulsar-heart-rate.firebaseapp.com",
+            databaseURL: "https://pulsar-heart-rate-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "pulsar-heart-rate",
+            storageBucket: "pulsar-heart-rate.firebasestorage.app",
+            messagingSenderId: "519120836572",
+            appId: "1:519120836572:web:0316ca11449b0ba05e2119",
+            measurementId: "G-3DC67XJVE1"
+        };
+
+        // Initialize Firebase
+        let database;
+        let usersRef;
+        
+        try {
+            firebase.initializeApp(firebaseConfig);
+            database = firebase.database();
+            usersRef = database.ref('users');
+        } catch (error) {
+            console.error("Firebase initialization error:", error);
+            showError('Cloud connection failed. Please check your internet connection.');
+        }
+
+        const colors = ['#FFEB3B', '#FDD835', '#FBC02D', '#F9A825', '#F57F17', '#FFD54F', '#FFCA28', '#FFC107'];
+        
+        document.getElementById('userForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.classList.remove('active');
+            
+            const name = document.getElementById('userName').value.trim();
+            const gender = document.getElementById('userGender').value;
+            const age = parseInt(document.getElementById('userAge').value);
+            const height = parseFloat(document.getElementById('userHeight').value);
+            const weight = parseFloat(document.getElementById('userWeight').value);
+            
+            // Validation
+            if (!name) {
+                showError('Please enter your name');
+                return;
+            }
+            if (!gender) {
+                showError('Please select your gender');
+                return;
+            }
+            if (!age || age < 1 || age > 120) {
+                showError('Please enter a valid age (1-120)');
+                return;
+            }
+            if (!height || height < 50 || height > 250) {
+                showError('Please enter a valid height in cm (50-250)');
+                return;
+            }
+            if (!weight || weight < 20 || weight > 300) {
+                showError('Please enter a valid weight in kg (20-300)');
+                return;
+            }
+            
+            if (!usersRef) {
+                showError('Cloud connection not available. Please check your internet connection.');
+                return;
+            }
+            
+            // Check if user already exists
+            const key = name.replace(/[.#$[\]]/g, '_');
+            usersRef.child(key).once('value').then((snapshot) => {
+                if (snapshot.exists()) {
+                    showError('A user with this name already exists');
+                    return;
+                }
+                
+                // Get existing users count for color assignment
+                usersRef.once('value').then((allSnapshot) => {
+                    const userCount = allSnapshot.numChildren();
+                    const colorIndex = userCount % colors.length;
+                    
+                    // Create new user
+                    const newUser = {
+                        name: name,
+                        gender: gender,
+                        age: age,
+                        height: height,
+                        weight: weight,
+                        color: colors[colorIndex],
+                        created: new Date().toISOString(),
+                        sessions: []
+                    };
+                    
+                    // Save to Firebase
+                    usersRef.child(key).set(newUser).then(() => {
+                        // Show success message
+                        document.getElementById('registrationForm').style.display = 'none';
+                        document.getElementById('successMessage').classList.add('active');
+                        
+                        // Redirect back after 3 seconds
+                        setTimeout(() => {
+                            window.history.back();
+                        }, 3000);
+                    }).catch((error) => {
+                        showError('Failed to save user: ' + error.message);
+                    });
+                });
+            }).catch((error) => {
+                showError('Failed to check existing users: ' + error.message);
+            });
+        });
+        
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.classList.add('active');
+        }
+    </script>
+</body>
+</html>
